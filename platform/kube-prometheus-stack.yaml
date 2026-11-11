@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 93.2.0
+    helm:
+      releaseName: kube-prometheus-stack   # => svc kube-prometheus-stack-prometheus:9090
+      valuesObject:
+        alertmanager:
+          enabled: false
+        grafana:
+          adminPassword: admin               # lab only!
+          defaultDashboardsTimezone: browser
+        # These control-plane endpoints aren't reachable on minikube; disabling them
+        # keeps the "Targets" page clean.
+        kubeEtcd:              { enabled: false }
+        kubeControllerManager: { enabled: false }
+        kubeScheduler:         { enabled: false }
+        kubeProxy:             { enabled: false }
+        prometheus:
+          prometheusSpec:
+            scrapeInterval: 15s
+            evaluationInterval: 15s
+            retention: 2d
+            # Select PodMonitors/ServiceMonitors in ALL namespaces, not only those
+            # labelled release=kube-prometheus-stack. App teams own their monitors.
+            podMonitorSelectorNilUsesHelmValues: false
+            serviceMonitorSelectorNilUsesHelmValues: false
+            ruleSelectorNilUsesHelmValues: false
+            resources:
+              requests: { cpu: 200m, memory: 512Mi }
+              limits:   { memory: 1Gi }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 10
+      backoff: { duration: 15s, factor: 2, maxDuration: 3m }
