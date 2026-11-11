@@ -1,0 +1,30 @@
+# Argo CD bootstrap values. Chart: argo/argo-cd 10.17.2
+global:
+  domain: argocd.lab.local
+
+configs:
+  params:
+    # TLS is terminated nowhere in this lab; serve plain HTTP behind port-forward.
+    server.insecure: true
+  cm:
+    # Pull-based: how often Argo CD polls Git (default 120s + jitter).
+    # A laptop cluster can't receive GitHub webhooks, so polling is the only trigger.
+    timeout.reconciliation: 60s
+    timeout.reconciliation.jitter: 10s
+    # Show the logs/exec buttons for Rollout pods in the UI
+    exec.enabled: true
+
+dex:
+  enabled: false          # local admin user only
+notifications:
+  enabled: false          # keep the lab light; Argo Rollouts has its own notifications
+
+controller:
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+repoServer:
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+server:
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
