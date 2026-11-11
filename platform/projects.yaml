@@ -1,0 +1,37 @@
+# Platform components: may install anything, from anywhere (Helm repos, OCI registries).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"   # create projects before the apps that use them
+spec:
+  description: Cluster add-ons owned by the platform team
+  sourceRepos: ['*']
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+---
+# Team applications: only from our repo, only into *-demo namespaces, no cluster-scoped objects
+# except the Namespace itself (needed for CreateNamespace=true).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  description: Application teams' workloads
+  sourceRepos:
+    - https://github.com/amga-d/rollouts-gitops-lab.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: '*-demo'
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
