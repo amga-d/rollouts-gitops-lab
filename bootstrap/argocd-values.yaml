@@ -4,8 +4,7 @@ global:
 
 configs:
   params:
-    # TLS is terminated nowhere in this lab; serve plain HTTP behind port-forward.
-    server.insecure: true
+    server.insecure: false
   cm:
     # Pull-based: how often Argo CD polls Git (default 120s + jitter).
     # A laptop cluster can't receive GitHub webhooks, so polling is the only trigger.
