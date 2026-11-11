@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: podinfo
+  labels:
+    app: podinfo
+spec:
+  replicas: 5
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: podinfo
+  template:
+    metadata:
+      labels:
+        app: podinfo
+    spec:
+      containers:
+        - name: podinfo
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+            - name: http-metrics
+              containerPort: 9797
+          env:
+            # --- release-controlled values (edited by scripts/release.sh) ---
+            - name: PODINFO_UI_MESSAGE
+              value: "release-1"
+            - name: PODINFO_RANDOM_ERROR
+              value: "false"
+            - name: PODINFO_RANDOM_DELAY
+              value: "false"
+            # --- static config ---
+            - name: PODINFO_PORT_METRICS        # metrics + /healthz on a separate port,
+              value: "9797"                     # unaffected by injected errors
+            - name: PODINFO_RANDOM_DELAY_UNIT
+              value: "ms"
+            - name: PODINFO_RANDOM_DELAY_MIN
+              value: "800"
+            - name: PODINFO_RANDOM_DELAY_MAX
+              value: "1500"
+          readinessProbe:
+            httpGet: { path: /healthz, port: http-metrics }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: http-metrics }
+            initialDelaySeconds: 5
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits:   { memory: 128Mi }
+  strategy:
+    canary:
+      # No traffic router yet: weight is approximated by the ratio of pods behind ONE Service.
+      steps:
+        - setWeight: 20
+        - pause: {}                  # indefinite: waits for a human "promote"
+        - setWeight: 50
+        - pause: { duration: 60s }
+        - setWeight: 80
+        - pause: { duration: 60s }

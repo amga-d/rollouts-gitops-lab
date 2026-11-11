@@ -1,0 +1,26 @@
+# Simulated users: ~4 concurrent clients hitting the Service continuously.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgen
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: loadgen }
+  template:
+    metadata:
+      labels: { app: loadgen }
+    spec:
+      containers:
+        - name: loadgen
+          image: curlimages/curl:8.17.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              TARGET=http://podinfo.canary-demo.svc.cluster.local/
+              worker() { while true; do curl -s -o /dev/null --max-time 5 "$TARGET"; sleep 0.2; done; }
+              for i in 1 2 3 4; do worker & done
+              wait
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits:   { memory: 64Mi }
