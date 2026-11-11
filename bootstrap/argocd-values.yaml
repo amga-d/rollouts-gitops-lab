@@ -8,7 +8,7 @@ configs:
   cm:
     # Pull-based: how often Argo CD polls Git (default 120s + jitter).
     # A laptop cluster can't receive GitHub webhooks, so polling is the only trigger.
-    timeout.reconciliation: 60s
+    timeout.reconciliation: 61s
     timeout.reconciliation.jitter: 10s
     # Show the logs/exec buttons for Rollout pods in the UI
     exec.enabled: true
