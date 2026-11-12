@@ -26,7 +26,7 @@ spec:
           env:
             # --- release-controlled values (edited by scripts/release.sh) ---
             - name: PODINFO_UI_MESSAGE
-              value: "release-4-hotfix"
+              value: "release-5"
             - name: PODINFO_RANDOM_ERROR
               value: "false"
             - name: PODINFO_RANDOM_DELAY
