@@ -5,7 +5,7 @@ metadata:
   labels:
     app: podinfo
 spec:
-  replicas: 5
+  replicas: 10
   revisionHistoryLimit: 3
   selector:
     matchLabels:
@@ -53,9 +53,10 @@ spec:
     canary:
       # No traffic router yet: weight is approximated by the ratio of pods behind ONE Service.
       steps:
-        - setWeight: 20
-        - pause: {}                  # indefinite: waits for a human "promote"
-        - setWeight: 50
+        - setWeight: 10
+      #  - pause: {}                  # indefinite: waits for a human "promote"
+        - pause: { duration: 2m }
+        - setWeight: 30
         - pause: { duration: 60s }
-        - setWeight: 80
+        - setWeight: 50
         - pause: { duration: 60s }
