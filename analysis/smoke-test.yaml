@@ -1,0 +1,36 @@
+# A Kubernetes Job is the measurement: exit 0 = Successful, non-zero = Failed.
+# Use it for functional checks that metrics can't express (e2e, contract tests, DB migrations...).
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterAnalysisTemplate
+metadata:
+  name: smoke-test
+spec:
+  args:
+    - name: service-url            # e.g. http://podinfo-preview.bluegreen-demo.svc.cluster.local
+  metrics:
+    - name: smoke-test
+      provider:
+        job:
+          spec:
+            backoffLimit: 0
+            activeDeadlineSeconds: 120
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: smoke
+                    image: curlimages/curl:8.17.0
+                    command: ["/bin/sh", "-c"]
+                    args:
+                      - |
+                        set -eu
+                        URL="{{args.service-url}}"
+                        echo "smoke testing $URL"
+                        curl -sf --max-time 5 "$URL/version"; echo
+                        fails=0
+                        for i in $(seq 1 30); do
+                          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$URL/")
+                          [ "$code" = "200" ] || { fails=$((fails+1)); echo "request $i -> $code"; }
+                        done
+                        echo "failures: $fails/30"
+                        [ "$fails" -eq 0 ]

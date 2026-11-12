@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterAnalysisTemplate
+metadata:
+  name: success-rate
+spec:
+  args:
+    - name: namespace
+    - name: pod-template-hash
+  metrics:
+    - name: success-rate
+      initialDelay: 30s          # new pods need a few scrapes before rate() means anything
+      interval: 30s
+      count: 4                   # ~2 minutes of evidence
+      failureLimit: 1            # tolerate one bad sample (noise), fail on the second
+      # No data / NaN counts as failure: "no evidence of health" is not health.
+      successCondition: len(result) > 0 && !isNaN(result[0]) && result[0] >= 0.95
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{
+                  namespace="{{args.namespace}}",
+                  rollouts_pod_template_hash="{{args.pod-template-hash}}",
+                  status=~"2.."}[1m]))
+            /
+            sum(rate(http_requests_total{
+                  namespace="{{args.namespace}}",
+                  rollouts_pod_template_hash="{{args.pod-template-hash}}"}[1m]))

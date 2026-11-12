@@ -1,0 +1,19 @@
+# The Web provider calls an HTTP endpoint and evaluates a JSON field.
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterAnalysisTemplate
+metadata:
+  name: http-health
+spec:
+  args:
+    - name: service-url
+  metrics:
+    - name: http-health
+      interval: 5s
+      count: 10
+      failureLimit: 0
+      successCondition: result == "OK"
+      provider:
+        web:
+          url: "{{args.service-url}}/healthz"    # podinfo returns {"status": "OK"}
+          timeoutSeconds: 5
+          jsonPath: "{$.status}"
