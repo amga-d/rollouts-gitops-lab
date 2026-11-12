@@ -51,6 +51,7 @@ spec:
             limits:   { memory: 128Mi }
   strategy:
     canary:
+      maxSurge: "100%"
       # No traffic router yet: weight is approximated by the ratio of pods behind ONE Service.
       steps:
         - setWeight: 10
