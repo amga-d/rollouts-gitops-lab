@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: podinfo
-          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          image: ghcr.io/stefanprodan/podinfo:6.16.0
           ports:
             - name: http
               containerPort: 9898
@@ -26,7 +26,7 @@ spec:
           env:
             # --- release-controlled values (edited by scripts/release.sh) ---
             - name: PODINFO_UI_MESSAGE
-              value: "release-1"
+              value: "release-2"
             - name: PODINFO_RANDOM_ERROR
               value: "false"
             - name: PODINFO_RANDOM_DELAY
