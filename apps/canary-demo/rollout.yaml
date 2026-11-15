@@ -53,7 +53,7 @@ spec:
     canary:
       # background analysis
       analysis:
-        template:
+        templates:
           - templateName: success-rate-continuous
             clusterScope: true
         startingStep: 1
@@ -68,7 +68,7 @@ spec:
         - pause: { duration: 60s }
         # ---- inline analysis: the rollout blocks here until the run finishes ----
         - analysis:
-            template:
+            templates:
               - templateName: latency-p95
                 clusterScope: true
             args:
@@ -81,6 +81,6 @@ spec:
         - pause: { duration: 60s }
         - setWeight: 60
         - pause: { duration: 60s }
-        - setWeight: 60 
+        - setWeight: 80
         - pause: { duration: 60s }
 
