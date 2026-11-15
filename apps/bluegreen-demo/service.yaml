@@ -15,7 +15,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: podinfo-active
+  name: podinfo-preview
 spec:
   ports:
   - name: http
@@ -23,5 +23,5 @@ spec:
     protocol: TCP
     targetPort: http
   selector:
-    app: podinfo-active
+    app: podinfo-preview
   type: ClusterIP
