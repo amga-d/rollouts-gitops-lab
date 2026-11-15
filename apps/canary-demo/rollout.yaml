@@ -26,11 +26,11 @@ spec:
           env:
             # --- release-controlled values (edited by scripts/release.sh) ---
             - name: PODINFO_UI_MESSAGE
-              value: "release-10-meh"
+              value: "release-11"
             - name: PODINFO_RANDOM_ERROR
               value: "false"
             - name: PODINFO_RANDOM_DELAY
-              value: "true"
+              value: "false"
             # --- static config ---
             - name: PODINFO_PORT_METRICS        # metrics + /healthz on a separate port,
               value: "9797"                     # unaffected by injected errors
