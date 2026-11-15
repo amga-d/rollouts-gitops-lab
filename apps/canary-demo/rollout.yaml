@@ -37,9 +37,9 @@ spec:
             - name: PODINFO_RANDOM_DELAY_UNIT
               value: "ms"
             - name: PODINFO_RANDOM_DELAY_MIN
-              value: "300"
+              value: "800"
             - name: PODINFO_RANDOM_DELAY_MAX
-              value: "500"
+              value: "1500"
           readinessProbe:
             httpGet: { path: /healthz, port: http-metrics }
             periodSeconds: 5
