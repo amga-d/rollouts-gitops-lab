@@ -81,6 +81,16 @@ spec:
         - pause: { duration: 60s }
         - setWeight: 60
         - pause: { duration: 60s }
+        - analysis:
+            templates:
+              - templateName: success-rate
+                clusterScope: true
+            args:
+              - name: namespace
+                value: canary-demo
+              - name: pod-template-hash
+                valueFrom:
+                  podTemplateHashValue: Latest
         - setWeight: 80
         - pause: { duration: 60s }
 
