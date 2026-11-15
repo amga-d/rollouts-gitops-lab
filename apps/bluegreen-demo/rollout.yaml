@@ -53,7 +53,7 @@ spec:
     blueGreen:
       activeService: podinfo-active
       previewService: podinfo-preview
-      autoPromotionEnabled: false        # Test 9.1: a human approves. Flipped in Test 9.2
+      autoPromotionEnabled: true         # analysis is the only gate
       scaleDownDelaySeconds: 600         # keep blue alive 10 min after the switch (fast rollback)
       prePromotionAnalysis:
         templates:
