@@ -9,7 +9,7 @@ spec:
     protocol: TCP
     targetPort: http
   selector:
-    app: podinfo-active
+    app: podinfo
   type: ClusterIP
 ---
 apiVersion: v1
@@ -23,5 +23,5 @@ spec:
     protocol: TCP
     targetPort: http
   selector:
-    app: podinfo-preview
+    app: podinfo
   type: ClusterIP
