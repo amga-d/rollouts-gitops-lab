@@ -1,0 +1,27 @@
+# 3 "users" on the active service + 1 synthetic client on preview, so
+# pre-promotion Prometheus analysis has traffic to look at.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgen
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: loadgen }
+  template:
+    metadata:
+      labels: { app: loadgen }
+    spec:
+      containers:
+        - name: loadgen
+          image: curlimages/curl:8.17.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              worker() { while true; do curl -s -o /dev/null --max-time 5 "$1"; sleep 0.2; done; }
+              for i in 1 2 3; do worker http://podinfo-active.bluegreen-demo.svc.cluster.local/ & done
+              worker http://podinfo-preview.bluegreen-demo.svc.cluster.local/ &
+              wait
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits:   { memory: 64Mi }

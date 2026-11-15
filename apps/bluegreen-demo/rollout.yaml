@@ -1,0 +1,86 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: podinfo
+  labels:
+    app: podinfo
+spec:
+  replicas: 3
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: podinfo
+  template:
+    metadata:
+      labels:
+        app: podinfo
+    spec:
+      containers:
+        - name: podinfo
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+            - name: http-metrics
+              containerPort: 9797
+          env:
+            # --- release-controlled values (edited by scripts/release.sh) ---
+            - name: PODINFO_UI_MESSAGE
+              value: "blue-1"
+            - name: PODINFO_RANDOM_ERROR
+              value: "false"
+            - name: PODINFO_RANDOM_DELAY
+              value: "false"
+            # --- static config ---
+            - name: PODINFO_PORT_METRICS
+              value: "9797"
+            - name: PODINFO_RANDOM_DELAY_UNIT
+              value: "ms"
+            - name: PODINFO_RANDOM_DELAY_MIN
+              value: "800"
+            - name: PODINFO_RANDOM_DELAY_MAX
+              value: "1500"
+          readinessProbe:
+            httpGet: { path: /healthz, port: http-metrics }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: http-metrics }
+            initialDelaySeconds: 5
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits:   { memory: 128Mi }
+  strategy:
+    blueGreen:
+      activeService: podinfo-active
+      previewService: podinfo-preview
+      autoPromotionEnabled: false        # Test 9.1: a human approves. Flipped in Test 9.2
+      scaleDownDelaySeconds: 600         # keep blue alive 10 min after the switch (fast rollback)
+      prePromotionAnalysis:
+        templates:
+          - templateName: smoke-test
+            clusterScope: true
+          - templateName: success-rate
+            clusterScope: true
+        args:
+          - name: service-url
+            value: http://podinfo-preview.bluegreen-demo.svc.cluster.local
+          - name: namespace
+            value: bluegreen-demo
+          - name: pod-template-hash
+            valueFrom:
+              podTemplateHashValue: Latest
+      postPromotionAnalysis:
+        templates:
+          - templateName: success-rate
+            clusterScope: true
+          - templateName: latency-p95
+            clusterScope: true
+        args:
+          - name: namespace
+            value: bluegreen-demo
+          - name: pod-template-hash
+            valueFrom:
+              podTemplateHashValue: Latest
+
+
+
