@@ -71,8 +71,6 @@ spec:
             templates:
               - templateName: latency-p95
                 clusterScope: true
-            dryRun:
-              - metricName: latency-p95
             args:
               - name: namespace
                 value: canary-demo
