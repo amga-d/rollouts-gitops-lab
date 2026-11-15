@@ -68,9 +68,9 @@ spec:
         - pause: { duration: 60s }
         # ---- inline analysis: the rollout blocks here until the run finishes ----
         - analysis:
-            templates:
-              dryRun:
-                - metricName: latency-p95
+            dryRun:
+              - metricName: latency-p95
+              #templates:
             # - templateName: latency-p95
             #   clusterScope: true
             args:
