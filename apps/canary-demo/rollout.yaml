@@ -68,11 +68,11 @@ spec:
         - pause: { duration: 60s }
         # ---- inline analysis: the rollout blocks here until the run finishes ----
         - analysis:
+            templates:
+              - templateName: latency-p95
+                clusterScope: true
             dryRun:
               - metricName: latency-p95
-              #templates:
-            # - templateName: latency-p95
-            #   clusterScope: true
             args:
               - name: namespace
                 value: canary-demo
